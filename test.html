@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lenticular Photocard Simulator</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f1f2f5;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #17181a;
+    }
+
+    .container {
+      width: min(900px, 94vw);
+      padding: 30px 0;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #777;
+      margin-bottom: 25px;
+    }
+
+    /* =========================
+       3D STAGE
+    ========================= */
+
+    .stage {
+      position: relative;
+      width: 100%;
+      min-height: 520px;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      border-radius: 22px;
+      overflow: hidden;
+
+      background:
+        radial-gradient(circle at center,
+          #ffffff 0%,
+          #e7e8ec 70%,
+          #d9dbe0 100%);
+
+      border: 1px solid #d4d5da;
+
+      cursor: grab;
+
+      /* penting untuk mobile */
+      touch-action: none;
+
+      user-select: none;
+    }
+
+    .stage:active {
+      cursor: grabbing;
+    }
+
+    .instruction {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+
+      transform: translateX(-50%);
+
+      padding: 8px 15px;
+
+      background: rgba(255,255,255,.85);
+      border: 1px solid #ddd;
+
+      border-radius: 30px;
+
+      font-size: 13px;
+      color: #666;
+
+      pointer-events: none;
+
+      white-space: nowrap;
+    }
+
+    /* =========================
+       CARD
+    ========================= */
+
+    .card-wrapper {
+      width: min(360px, 65vw);
+      aspect-ratio: 1.586;
+
+      perspective: 1000px;
+
+      transform-style: preserve-3d;
+    }
+
+    .card {
+      width: 100%;
+      height: 100%;
+
+      position: relative;
+
+      border-radius: 17px;
+
+      overflow: hidden;
+
+      transform-style: preserve-3d;
+
+      box-shadow:
+        0 30px 60px rgba(0,0,0,.25),
+        0 5px 15px rgba(0,0,0,.15);
+    }
+
+    /* =========================
+       IMAGE A / B
+    ========================= */
+
+    .layer {
+      position: absolute;
+      inset: 0;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      font-size: clamp(80px, 15vw, 140px);
+
+      font-weight: 900;
+
+      color: white;
+
+      transition: opacity .05s linear;
+
+      backface-visibility: hidden;
+    }
+
+    .layer-a {
+      background:
+        linear-gradient(
+          135deg,
+          #1877ff,
+          #0642b5
+        );
+
+      z-index: 2;
+    }
+
+    .layer-b {
+      background:
+        linear-gradient(
+          135deg,
+          #ff4b4b,
+          #ae0000
+        );
+
+      z-index: 1;
+    }
+
+    .layer span {
+      text-shadow:
+        0 6px 10px rgba(0,0,0,.25);
+    }
+
+    /* =========================
+       LENTICULAR RIDGES
+    ========================= */
+
+    .ridges {
+      position: absolute;
+      inset: 0;
+
+      z-index: 10;
+
+      pointer-events: none;
+
+      background:
+        repeating-linear-gradient(
+          90deg,
+          rgba(255,255,255,.12) 0px,
+          rgba(255,255,255,.12) 1px,
+          transparent 1px,
+          transparent 5px
+        );
+
+      mix-blend-mode: overlay;
+    }
+
+    /* =========================
+       LIGHT REFLECTION
+    ========================= */
+
+    .shine {
+      position: absolute;
+
+      width: 160%;
+      height: 160%;
+
+      left: -30%;
+      top: -30%;
+
+      z-index: 20;
+
+      pointer-events: none;
+
+      background:
+        linear-gradient(
+          115deg,
+          transparent 35%,
+          rgba(255,255,255,.45) 48%,
+          rgba(255,255,255,.08) 53%,
+          transparent 65%
+        );
+
+      mix-blend-mode: screen;
+
+      transform: translateX(-30%);
+    }
+
+    /* =========================
+       INFORMATION
+    ========================= */
+
+    .stats {
+      display: grid;
+
+      grid-template-columns:
+        repeat(3, 1fr);
+
+      gap: 12px;
+
+      margin-top: 15px;
+    }
+
+    .stat {
+      background: white;
+
+      border: 1px solid #ddd;
+
+      border-radius: 12px;
+
+      padding: 13px;
+
+      text-align: center;
+    }
+
+    .stat-label {
+      display: block;
+
+      font-size: 11px;
+
+      color: #777;
+
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 17px;
+
+      font-weight: bold;
+    }
+
+    /* =========================
+       BUTTONS
+    ========================= */
+
+    .controls {
+      display: flex;
+
+      justify-content: center;
+
+      gap: 10px;
+
+      margin-top: 15px;
+    }
+
+    button {
+      border: 1px solid #d5d5d8;
+
+      background: white;
+
+      padding: 11px 18px;
+
+      border-radius: 10px;
+
+      font-size: 14px;
+
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #f4f4f5;
+    }
+
+    .legend {
+      display: flex;
+
+      justify-content: center;
+
+      gap: 20px;
+
+      margin-top: 14px;
+
+      font-size: 12px;
+
+      color: #777;
+    }
+
+    .dot {
+      display: inline-block;
+
+      width: 9px;
+      height: 9px;
+
+      border-radius: 50%;
+
+      margin-right: 5px;
+    }
+
+    .blue {
+      background: #1877ff;
+    }
+
+    .red {
+      background: #e52d2d;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 600px) {
+
+      .stage {
+        min-height: 400px;
+      }
+
+      .card-wrapper {
+        width: 72vw;
+      }
+
+      .instruction {
+        font-size: 11px;
+      }
+
+      .stats {
+        gap: 7px;
+      }
+
+      .stat {
+        padding: 10px 5px;
+      }
+
+      .stat-value {
+        font-size: 14px;
+      }
+
+      .legend {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+
+
+<body>
+
+<div class="container">
+
+  <h1>Lenticular Photocard Simulator</h1>
+
+  <div class="subtitle">
+    Drag photocard untuk melihat efek 3D dan perubahan gambar
+  </div>
+
+
+  <!-- =========================
+       3D AREA
+  ========================= -->
+
+  <div
+    class="stage"
+    id="stage"
+  >
+
+    <div class="instruction">
+      ↔ Drag menggunakan cursor
+    </div>
+
+
+    <div class="card-wrapper">
+
+      <div
+        class="card"
+        id="card"
+      >
+
+        <!-- IMAGE A -->
+
+        <div
+          class="layer layer-a"
+          id="layerA"
+        >
+          <span>A</span>
+        </div>
+
+
+        <!-- IMAGE B -->
+
+        <div
+          class="layer layer-b"
+          id="layerB"
+        >
+          <span>B</span>
+        </div>
+
+
+        <!-- Lenticular Lines -->
+
+        <div class="ridges"></div>
+
+
+        <!-- Reflection -->
+
+        <div
+          class="shine"
+          id="shine"
+        ></div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       STATS
+  ========================= -->
+
+  <div class="stats">
+
+    <div class="stat">
+
+      <span class="stat-label">
+        Horizontal Angle
+      </span>
+
+      <span
+        class="stat-value"
+        id="yaw"
+      >
+        0°
+      </span>
+
+    </div>
+
+
+    <div class="stat">
+
+      <span class="stat-label">
+        Vertical Angle
+      </span>
+
+      <span
+        class="stat-value"
+        id="pitch"
+      >
+        0°
+      </span>
+
+    </div>
+
+
+    <div class="stat">
+
+      <span class="stat-label">
+        Visible Image
+      </span>
+
+      <span
+        class="stat-value"
+        id="visible"
+      >
+        A + B
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       CONTROLS
+  ========================= -->
+
+  <div class="controls">
+
+    <button
+      id="reset"
+      type="button"
+    >
+      Reset View
+    </button>
+
+    <button
+      id="autoRotate"
+      type="button"
+    >
+      Auto Rotate
+    </button>
+
+  </div>
+
+
+  <!-- =========================
+       LEGEND
+  ========================= -->
+
+  <div class="legend">
+
+    <span>
+      <i class="dot blue"></i>
+      Box 1 — A
+    </span>
+
+    <span>
+      <i class="dot red"></i>
+      Box 2 — B
+    </span>
+
+    <span>
+      Lenticular Simulation
+    </span>
+
+  </div>
+
+</div>
+
+
+<script>
+
+  /* =====================================================
+     ELEMENTS
+  ===================================================== */
+
+  const stage =
+    document.getElementById("stage");
+
+  const card =
+    document.getElementById("card");
+
+  const layerA =
+    document.getElementById("layerA");
+
+  const layerB =
+    document.getElementById("layerB");
+
+  const shine =
+    document.getElementById("shine");
+
+  const yawOutput =
+    document.getElementById("yaw");
+
+  const pitchOutput =
+    document.getElementById("pitch");
+
+  const visibleOutput =
+    document.getElementById("visible");
+
+  const resetButton =
+    document.getElementById("reset");
+
+  const autoButton =
+    document.getElementById("autoRotate");
+
+
+  /* =====================================================
+     VARIABLES
+  ===================================================== */
+
+  let yaw = 0;
+  let pitch = 0;
+
+  let dragging = false;
+
+  let lastX = 0;
+  let lastY = 0;
+
+  let autoRotate = false;
+
+  let animationFrame;
+
+
+  /* =====================================================
+     LIMIT FUNCTION
+  ===================================================== */
+
+  function clamp(
+    value,
+    min,
+    max
+  ) {
+
+    return Math.max(
+      min,
+      Math.min(max, value)
+    );
+
+  }
+
+
+  /* =====================================================
+     RENDER 3D
+  ===================================================== */
+
+  function render() {
+
+    /*
+      Batasi sudut supaya efek
+      photocard tetap natural.
+    */
+
+    yaw =
+      clamp(
+        yaw,
+        -45,
+        45
+      );
+
+    pitch =
+      clamp(
+        pitch,
+        -30,
+        30
+      );
+
+
+    /*
+      3D ROTATION
+    */
+
+    card.style.transform =
+      `
+      rotateX(${-pitch}deg)
+      rotateY(${yaw}deg)
+      `;
+
+
+    /* =================================================
+       LENTICULAR IMAGE SWITCHING
+    ================================================= */
+
+    /*
+      Di tengah:
+      A dan B sedikit overlap.
+
+      Makin kiri:
+      A semakin dominan.
+
+      Makin kanan:
+      B semakin dominan.
+    */
+
+    const transition =
+      Math.abs(yaw) / 30;
+
+
+    if (yaw < 0) {
+
+      layerA.style.opacity = 1;
+
+      layerB.style.opacity =
+        clamp(
+          transition,
+          0,
+          1
+        );
+
+    }
+
+    else if (yaw > 0) {
+
+      layerB.style.opacity = 1;
+
+      layerA.style.opacity =
+        clamp(
+          transition,
+          0,
+          1
+        );
+
+    }
+
+    else {
+
+      layerA.style.opacity = 1;
+
+      layerB.style.opacity = 0;
+
+    }
+
+
+    /* =================================================
+       3D DEPTH
+    ================================================= */
+
+    const depthA =
+      5 +
+      ((yaw + 45) / 90) * 8;
+
+    const depthB =
+      5 +
+      ((45 - yaw) / 90) * 8;
+
+
+    layerA.style.transform =
+      `translateZ(${depthA}px)`;
+
+
+    layerB.style.transform =
+      `translateZ(${depthB}px)`;
+
+
+    /* =================================================
+       LIGHT REFLECTION
+    ================================================= */
+
+    shine.style.transform =
+      `
+      translateX(${yaw * 1.6}%)
+      translateY(${pitch * .5}%)
+      rotate(8deg)
+      `;
+
+
+    /* =================================================
+       INFORMATION
+    ================================================= */
+
+    yawOutput.textContent =
+      Math.round(yaw) + "°";
+
+    pitchOutput.textContent =
+      Math.round(pitch) + "°";
+
+
+    if (Math.abs(yaw) < 5) {
+
+      visibleOutput.textContent =
+        "A + B";
+
+    }
+
+    else if (yaw < 0) {
+
+      visibleOutput.textContent =
+        "A";
+
+    }
+
+    else {
+
+      visibleOutput.textContent =
+        "B";
+
+    }
+
+  }
+
+
+  /* =====================================================
+     POINTER DOWN
+  ===================================================== */
+
+  stage.addEventListener(
+    "pointerdown",
+    function(event) {
+
+      dragging = true;
+
+      lastX =
+        event.clientX;
+
+      lastY =
+        event.clientY;
+
+
+      stage.setPointerCapture(
+        event.pointerId
+      );
+
+    }
+  );
+
+
+  /* =====================================================
+     POINTER MOVE
+  ===================================================== */
+
+  stage.addEventListener(
+    "pointermove",
+    function(event) {
+
+      if (!dragging) {
+        return;
+      }
+
+
+      const deltaX =
+        event.clientX -
+        lastX;
+
+
+      const deltaY =
+        event.clientY -
+        lastY;
+
+
+      lastX =
+        event.clientX;
+
+      lastY =
+        event.clientY;
+
+
+      /*
+        Horizontal drag
+        → Y axis rotation
+      */
+
+      yaw +=
+        deltaX * 0.45;
+
+
+      /*
+        Vertical drag
+        → X axis rotation
+      */
+
+      pitch -=
+        deltaY * 0.35;
+
+
+      render();
+
+    }
+  );
+
+
+  /* =====================================================
+     POINTER UP
+  ===================================================== */
+
+  function stopDragging() {
+
+    dragging = false;
+
+  }
+
+
+  stage.addEventListener(
+    "pointerup",
+    stopDragging
+  );
+
+  stage.addEventListener(
+    "pointercancel",
+    stopDragging
+  );
+
+
+  /* =====================================================
+     RESET
+  ===================================================== */
+
+  resetButton.addEventListener(
+    "click",
+    function() {
+
+      yaw = 0;
+
+      pitch = 0;
+
+      render();
+
+    }
+  );
+
+
+  /* =====================================================
+     AUTO ROTATE
+  ===================================================== */
+
+  autoButton.addEventListener(
+    "click",
+    function() {
+
+      autoRotate =
+        !autoRotate;
+
+
+      if (autoRotate) {
+
+        autoButton.textContent =
+          "Stop Auto Rotate";
+
+        animate();
+
+      }
+
+      else {
+
+        autoButton.textContent =
+          "Auto Rotate";
+
+        cancelAnimationFrame(
+          animationFrame
+        );
+
+      }
+
+    }
+  );
+
+
+  /* =====================================================
+     ANIMATION
+  ===================================================== */
+
+  function animate() {
+
+    if (!autoRotate) {
+      return;
+    }
+
+
+    if (!dragging) {
+
+      yaw += 0.35;
+
+
+      if (yaw > 45) {
+
+        yaw = -45;
+
+      }
+
+
+      render();
+
+    }
+
+
+    animationFrame =
+      requestAnimationFrame(
+        animate
+      );
+
+  }
+
+
+  /* =====================================================
+     INITIALIZE
+  ===================================================== */
+
+  render();
+
+</script>
+
+</body>
+</html>
