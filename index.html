@@ -1,987 +1,1851 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lenticular Photocard Simulator</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #f1f2f5;
-      font-family: Arial, Helvetica, sans-serif;
-      color: #17181a;
-    }
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    .container {
-      width: min(900px, 94vw);
-      padding: 30px 0;
-    }
+    <title>Here lies your Wife</title>
 
-    h1 {
-      text-align: center;
-      margin: 0 0 8px;
-      font-size: 28px;
-    }
 
-    .subtitle {
-      text-align: center;
-      color: #777;
-      margin-bottom: 25px;
-    }
+    <style>
 
-    /* =========================
-       3D STAGE
-    ========================= */
+        /* =====================================================
+           RESET
+        ===================================================== */
 
-    .stage {
-      position: relative;
-      width: 100%;
-      min-height: 520px;
+        * {
+            box-sizing: border-box;
+        }
 
-      display: flex;
-      justify-content: center;
-      align-items: center;
 
-      border-radius: 22px;
-      overflow: hidden;
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            min-height: 100%;
+        }
 
-      background:
-        radial-gradient(circle at center,
-          #ffffff 0%,
-          #e7e8ec 70%,
-          #d9dbe0 100%);
 
-      border: 1px solid #d4d5da;
+        /* =====================================================
+           BODY
+        ===================================================== */
 
-      cursor: grab;
+        body {
 
-      /* penting untuk mobile */
-      touch-action: none;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
 
-      user-select: none;
-    }
+            background:
+                #111;
 
-    .stage:active {
-      cursor: grabbing;
-    }
+            color:
+                #fff;
 
-    .instruction {
-      position: absolute;
-      top: 18px;
-      left: 50%;
+            display:
+                flex;
 
-      transform: translateX(-50%);
+            justify-content:
+                center;
 
-      padding: 8px 15px;
+            align-items:
+                center;
 
-      background: rgba(255,255,255,.85);
-      border: 1px solid #ddd;
+            overflow-x:
+                hidden;
 
-      border-radius: 30px;
+            transition:
+                background .4s ease,
+                color .4s ease;
+        }
 
-      font-size: 13px;
-      color: #666;
 
-      pointer-events: none;
+        /* =====================================================
+           LIGHT MODE
+        ===================================================== */
 
-      white-space: nowrap;
-    }
+        body.light-mode {
 
-    /* =========================
-       CARD
-    ========================= */
+            background:
+                #f1f1f1;
 
-    .card-wrapper {
-      width: min(360px, 65vw);
-      aspect-ratio: 1.586;
+            color:
+                #171717;
+        }
 
-      perspective: 1000px;
 
-      transform-style: preserve-3d;
-    }
+        /* =====================================================
+           MAIN CONTAINER
+        ===================================================== */
 
-    .card {
-      width: 100%;
-      height: 100%;
+        .container {
 
-      position: relative;
+            width:
+                min(1250px, 96vw);
 
-      border-radius: 17px;
+            padding:
+                35px 0;
 
-      overflow: hidden;
+            margin:
+                0 auto;
 
-      transform-style: preserve-3d;
+            text-align:
+                center;
+        }
 
-      box-shadow:
-        0 30px 60px rgba(0,0,0,.25),
-        0 5px 15px rgba(0,0,0,.15);
-    }
 
-    /* =========================
-       IMAGE A / B
-    ========================= */
+        /* =====================================================
+           TITLE
+        ===================================================== */
 
-    .layer {
-      position: absolute;
-      inset: 0;
+        h1 {
 
-      display: flex;
-      justify-content: center;
-      align-items: center;
+            margin:
+                0;
 
-      font-size: clamp(80px, 15vw, 140px);
+            font-size:
+                clamp(28px, 5vw, 44px);
 
-      font-weight: 900;
+            font-weight:
+                700;
 
-      color: white;
+            letter-spacing:
+                -1.5px;
+        }
 
-      transition: opacity .05s linear;
 
-      backface-visibility: hidden;
-    }
+        /* =====================================================
+           SUBTITLE
+        ===================================================== */
 
-    .layer-a {
-      background:
-        linear-gradient(
-          135deg,
-          #1877ff,
-          #0642b5
-        );
+        .subtitle {
 
-      z-index: 2;
-    }
+            margin-top:
+                8px;
 
-    .layer-b {
-      background:
-        linear-gradient(
-          135deg,
-          #ff4b4b,
-          #ae0000
-        );
+            font-size:
+                16px;
 
-      z-index: 1;
-    }
+            color:
+                #bdbdbd;
 
-    .layer span {
-      text-shadow:
-        0 6px 10px rgba(0,0,0,.25);
-    }
+            transition:
+                color .4s ease;
+        }
 
-    /* =========================
-       LENTICULAR RIDGES
-    ========================= */
 
-    .ridges {
-      position: absolute;
-      inset: 0;
+        body.light-mode
+        .subtitle {
 
-      z-index: 10;
+            color:
+                #666;
+        }
 
-      pointer-events: none;
 
-      background:
-        repeating-linear-gradient(
-          90deg,
-          rgba(255,255,255,.12) 0px,
-          rgba(255,255,255,.12) 1px,
-          transparent 1px,
-          transparent 5px
-        );
+        /* =====================================================
+           FRAME
+        ===================================================== */
 
-      mix-blend-mode: overlay;
-    }
+        .stage {
 
-    /* =========================
-       LIGHT REFLECTION
-    ========================= */
+            position:
+                relative;
 
-    .shine {
-      position: absolute;
+            width:
+                100%;
 
-      width: 160%;
-      height: 160%;
+            /*
+                Fixed aspect ratio.
+                Zooming the card will NOT resize
+                this frame.
+            */
 
-      left: -30%;
-      top: -30%;
+            aspect-ratio:
+                16 / 10;
 
-      z-index: 20;
+            margin-top:
+                28px;
 
-      pointer-events: none;
+            display:
+                flex;
 
-      background:
-        linear-gradient(
-          115deg,
-          transparent 35%,
-          rgba(255,255,255,.45) 48%,
-          rgba(255,255,255,.08) 53%,
-          transparent 65%
-        );
+            justify-content:
+                center;
 
-      mix-blend-mode: screen;
+            align-items:
+                center;
 
-      transform: translateX(-30%);
-    }
+            overflow:
+                hidden;
 
-    /* =========================
-       INFORMATION
-    ========================= */
+            border-radius:
+                24px;
 
-    .stats {
-      display: grid;
+            background:
+                radial-gradient(
+                    circle at center,
+                    #333 0%,
+                    #202020 60%,
+                    #111 100%
+                );
 
-      grid-template-columns:
-        repeat(3, 1fr);
+            border:
+                1px solid #3a3a3a;
 
-      gap: 12px;
+            cursor:
+                grab;
 
-      margin-top: 15px;
-    }
+            touch-action:
+                none;
 
-    .stat {
-      background: white;
+            user-select:
+                none;
 
-      border: 1px solid #ddd;
+            isolation:
+                isolate;
 
-      border-radius: 12px;
+            transition:
+                background .4s ease,
+                border-color .4s ease;
+        }
 
-      padding: 13px;
 
-      text-align: center;
-    }
+        /* =====================================================
+           LIGHT MODE FRAME
+        ===================================================== */
 
-    .stat-label {
-      display: block;
+        body.light-mode
+        .stage {
 
-      font-size: 11px;
+            background:
+                radial-gradient(
+                    circle at center,
+                    #ffffff 0%,
+                    #e9e9eb 60%,
+                    #d7d8dc 100%
+                );
 
-      color: #777;
+            border-color:
+                #d0d0d4;
+        }
 
-      margin-bottom: 4px;
-    }
 
-    .stat-value {
-      font-size: 17px;
+        .stage:active {
 
-      font-weight: bold;
-    }
+            cursor:
+                grabbing;
+        }
 
-    /* =========================
-       BUTTONS
-    ========================= */
 
-    .controls {
-      display: flex;
+        /* =====================================================
+           DRAG INSTRUCTION
+        ===================================================== */
 
-      justify-content: center;
+        .instruction {
 
-      gap: 10px;
+            position:
+                absolute;
 
-      margin-top: 15px;
-    }
+            top:
+                18px;
 
-    button {
-      border: 1px solid #d5d5d8;
+            left:
+                50%;
 
-      background: white;
+            transform:
+                translateX(-50%);
 
-      padding: 11px 18px;
+            padding:
+                9px 18px;
 
-      border-radius: 10px;
+            background:
+                rgba(0,0,0,.65);
 
-      font-size: 14px;
+            border:
+                1px solid
+                rgba(255,255,255,.15);
 
-      cursor: pointer;
-    }
+            border-radius:
+                30px;
 
-    button:hover {
-      background: #f4f4f5;
-    }
+            font-size:
+                13px;
 
-    .legend {
-      display: flex;
+            color:
+                #fff;
 
-      justify-content: center;
+            pointer-events:
+                none;
 
-      gap: 20px;
+            white-space:
+                nowrap;
 
-      margin-top: 14px;
+            z-index:
+                100;
 
-      font-size: 12px;
+            opacity:
+                1;
 
-      color: #777;
-    }
+            /*
+                Visible for 10 seconds,
+                then fades out.
+            */
 
-    .dot {
-      display: inline-block;
+            animation:
+                fadeInstruction 2s ease forwards;
 
-      width: 9px;
-      height: 9px;
+            animation-delay:
+                10s;
+        }
 
-      border-radius: 50%;
 
-      margin-right: 5px;
-    }
+        body.light-mode
+        .instruction {
 
-    .blue {
-      background: #1877ff;
-    }
+            background:
+                rgba(255,255,255,.9);
 
-    .red {
-      background: #e52d2d;
-    }
+            color:
+                #444;
 
-    /* =========================
-       MOBILE
-    ========================= */
+            border-color:
+                #ddd;
+        }
 
-    @media (max-width: 600px) {
 
-      .stage {
-        min-height: 400px;
-      }
+        @keyframes fadeInstruction {
 
-      .card-wrapper {
-        width: 72vw;
-      }
+            from {
+                opacity:
+                    1;
+            }
 
-      .instruction {
-        font-size: 11px;
-      }
+            to {
+                opacity:
+                    0;
+            }
 
-      .stats {
-        gap: 7px;
-      }
+        }
 
-      .stat {
-        padding: 10px 5px;
-      }
 
-      .stat-value {
-        font-size: 14px;
-      }
+        /* =====================================================
+           CARD WRAPPER
+        ===================================================== */
 
-      .legend {
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-    }
-  </style>
+        .card-wrapper {
+
+            /*
+                Card size.
+            */
+
+            width:
+                min(390px, 34%);
+
+            aspect-ratio:
+                3 / 4;
+
+            perspective:
+                1400px;
+
+            transform-style:
+                preserve-3d;
+
+            flex-shrink:
+                0;
+
+            transform:
+                translate3d(
+                    0,
+                    0,
+                    0
+                );
+
+            will-change:
+                transform;
+        }
+
+
+        /* =====================================================
+           CARD
+        ===================================================== */
+
+        .card {
+
+            position:
+                relative;
+
+            width:
+                100%;
+
+            height:
+                100%;
+
+            border-radius:
+                16px;
+
+            overflow:
+                hidden;
+
+            transform-style:
+                preserve-3d;
+
+            background:
+                #222;
+
+            box-shadow:
+
+                0 40px 80px
+                rgba(0,0,0,.45),
+
+                0 10px 25px
+                rgba(0,0,0,.25);
+
+            will-change:
+                transform;
+        }
+
+
+        /* =====================================================
+           IMAGE LAYERS
+        ===================================================== */
+
+        .layer {
+
+            position:
+                absolute;
+
+            inset:
+                0;
+
+            width:
+                100%;
+
+            height:
+                100%;
+
+            object-fit:
+                cover;
+
+            backface-visibility:
+                hidden;
+
+            pointer-events:
+                none;
+
+            user-select:
+                none;
+
+            will-change:
+                opacity,
+                transform;
+        }
+
+
+        /* =====================================================
+           PHOTO A
+        ===================================================== */
+
+        .layer-a {
+
+            z-index:
+                2;
+
+            opacity:
+                1;
+
+            transform:
+                translateZ(8px);
+        }
+
+
+        /* =====================================================
+           PHOTO B
+        ===================================================== */
+
+        .layer-b {
+
+            z-index:
+                1;
+
+            opacity:
+                0;
+
+            transform:
+                translateZ(5px);
+        }
+
+
+        /* =====================================================
+           LENTICULAR RIDGES
+        ===================================================== */
+
+        .ridges {
+
+            position:
+                absolute;
+
+            inset:
+                0;
+
+            z-index:
+                20;
+
+            pointer-events:
+                none;
+
+            background:
+
+                repeating-linear-gradient(
+                    90deg,
+
+                    rgba(255,255,255,.10)
+                    0px,
+
+                    rgba(255,255,255,.10)
+                    1px,
+
+                    transparent
+                    1px,
+
+                    transparent
+                    5px
+                );
+
+            mix-blend-mode:
+                overlay;
+        }
+
+
+        /* =====================================================
+           LIGHT REFLECTION
+        ===================================================== */
+
+        .shine {
+
+            position:
+                absolute;
+
+            width:
+                160%;
+
+            height:
+                160%;
+
+            left:
+                -30%;
+
+            top:
+                -30%;
+
+            z-index:
+                30;
+
+            pointer-events:
+                none;
+
+            background:
+
+                linear-gradient(
+                    115deg,
+
+                    transparent 35%,
+
+                    rgba(255,255,255,.45)
+                    48%,
+
+                    rgba(255,255,255,.08)
+                    53%,
+
+                    transparent 65%
+                );
+
+            mix-blend-mode:
+                screen;
+
+            transform:
+                translateX(-30%);
+        }
+
+
+        /* =====================================================
+           CONTROLS
+        ===================================================== */
+
+        .controls {
+
+            display:
+                flex;
+
+            justify-content:
+                center;
+
+            align-items:
+                center;
+
+            gap:
+                10px;
+
+            flex-wrap:
+                wrap;
+
+            margin-top:
+                18px;
+        }
+
+
+        .controls button {
+
+            border:
+                1px solid #444;
+
+            background:
+                #222;
+
+            color:
+                white;
+
+            padding:
+                11px 20px;
+
+            border-radius:
+                10px;
+
+            font-size:
+                14px;
+
+            cursor:
+                pointer;
+
+            min-height:
+                42px;
+
+            transition:
+                background .2s ease,
+                border-color .2s ease,
+                color .2s ease,
+                transform .1s ease;
+        }
+
+
+        .controls button:hover {
+
+            background:
+                #303030;
+        }
+
+
+        .controls button:active {
+
+            transform:
+                scale(.97);
+        }
+
+
+        /* =====================================================
+           LIGHT MODE BUTTONS
+        ===================================================== */
+
+        body.light-mode
+        .controls button {
+
+            background:
+                white;
+
+            color:
+                #222;
+
+            border-color:
+                #d3d3d3;
+        }
+
+
+        body.light-mode
+        .controls button:hover {
+
+            background:
+                #f3f3f3;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 700px) {
+
+            .container {
+
+                width:
+                    94vw;
+
+                padding:
+                    25px 0;
+            }
+
+
+            .stage {
+
+                aspect-ratio:
+                    4 / 3;
+
+                margin-top:
+                    22px;
+
+                border-radius:
+                    18px;
+            }
+
+
+            .card-wrapper {
+
+                width:
+                    55%;
+            }
+
+
+            .instruction {
+
+                font-size:
+                    11px;
+
+                padding:
+                    7px 13px;
+            }
+
+        }
+
+
+        /* =====================================================
+           REDUCED MOTION
+        ===================================================== */
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .instruction {
+
+                animation:
+                    none;
+
+                opacity:
+                    1;
+            }
+
+        }
+
+    </style>
+
 </head>
 
 
 <body>
 
-<div class="container">
 
-  <h1>Lenticular Photocard Simulator</h1>
-
-  <div class="subtitle">
-    Drag photocard untuk melihat efek 3D dan perubahan gambar
-  </div>
+    <div
+        class="container"
+        id="mainContainer"
+    >
 
 
-  <!-- =========================
-       3D AREA
-  ========================= -->
+        <!-- =================================================
+             TITLE
+        ================================================= -->
 
-  <div
-    class="stage"
-    id="stage"
-  >
-
-    <div class="instruction">
-      ↔ Drag menggunakan cursor
-    </div>
+        <h1>
+            Here lies your Wife
+        </h1>
 
 
-    <div class="card-wrapper">
+        <!-- =================================================
+             SUBTITLE
+        ================================================= -->
 
-      <div
-        class="card"
-        id="card"
-      >
-
-        <!-- IMAGE A -->
-
-        <div
-          class="layer layer-a"
-          id="layerA"
-        >
-          <span>A</span>
+        <div class="subtitle">
+            I hope you like it ;)
         </div>
 
 
-        <!-- IMAGE B -->
+        <!-- =================================================
+             MAIN FRAME
+        ================================================= -->
 
         <div
-          class="layer layer-b"
-          id="layerB"
+            class="stage"
+            id="stage"
         >
-          <span>B</span>
+
+
+            <!-- =============================================
+                 INSTRUCTION
+            ============================================== -->
+
+            <div
+                class="instruction"
+            >
+                drag to interact
+            </div>
+
+
+            <!-- =============================================
+                 PHOTOCARD
+            ============================================== -->
+
+            <div
+                class="card-wrapper"
+                id="cardWrapper"
+            >
+
+
+                <div
+                    class="card"
+                    id="card"
+                >
+
+
+                    <!-- =====================================
+                         PHOTO A
+                    ====================================== -->
+
+                    <img
+                        src="foto_a.png"
+
+                        class="layer layer-a"
+
+                        id="layerA"
+
+                        alt="Photo A"
+
+                        draggable="false"
+                    >
+
+
+                    <!-- =====================================
+                         PHOTO B
+                    ====================================== -->
+
+                    <img
+                        src="foto_b.png"
+
+                        class="layer layer-b"
+
+                        id="layerB"
+
+                        alt="Photo B"
+
+                        draggable="false"
+                    >
+
+
+                    <!-- =====================================
+                         LENTICULAR EFFECT
+                    ====================================== -->
+
+                    <div
+                        class="ridges"
+                    ></div>
+
+
+                    <!-- =====================================
+                         REFLECTION
+                    ====================================== -->
+
+                    <div
+                        class="shine"
+                        id="shine"
+                    ></div>
+
+
+                </div>
+
+            </div>
+
+
         </div>
 
 
-        <!-- Lenticular Lines -->
+        <!-- =================================================
+             CONTROLS
+        ================================================= -->
 
-        <div class="ridges"></div>
-
-
-        <!-- Reflection -->
-
-        <div
-          class="shine"
-          id="shine"
-        ></div>
-
-      </div>
-
-    </div>
-
-  </div>
+        <div class="controls">
 
 
-  <!-- =========================
-       STATS
-  ========================= -->
+            <!-- RESET -->
 
-  <div class="stats">
-
-    <div class="stat">
-
-      <span class="stat-label">
-        Horizontal Angle
-      </span>
-
-      <span
-        class="stat-value"
-        id="yaw"
-      >
-        0°
-      </span>
-
-    </div>
+            <button
+                type="button"
+                id="reset"
+            >
+                ↺ Reset
+            </button>
 
 
-    <div class="stat">
+            <!-- AUTO ROTATE -->
 
-      <span class="stat-label">
-        Vertical Angle
-      </span>
+            <button
+                type="button"
+                id="autoRotate"
+            >
+                ↻ Auto Rotate
+            </button>
 
-      <span
-        class="stat-value"
-        id="pitch"
-      >
-        0°
-      </span>
+
+            <!-- THEME -->
+
+            <button
+                type="button"
+                id="themeButton"
+            >
+                make light mode
+            </button>
+
+
+        </div>
+
 
     </div>
 
 
-    <div class="stat">
 
-      <span class="stat-label">
-        Visible Image
-      </span>
+    <script>
 
-      <span
-        class="stat-value"
-        id="visible"
-      >
-        A + B
-      </span>
+        /* =====================================================
+           ELEMENTS
+        ===================================================== */
 
-    </div>
-
-  </div>
+        const stage =
+            document.getElementById(
+                "stage"
+            );
 
 
-  <!-- =========================
-       CONTROLS
-  ========================= -->
-
-  <div class="controls">
-
-    <button
-      id="reset"
-      type="button"
-    >
-      Reset View
-    </button>
-
-    <button
-      id="autoRotate"
-      type="button"
-    >
-      Auto Rotate
-    </button>
-
-  </div>
+        const cardWrapper =
+            document.getElementById(
+                "cardWrapper"
+            );
 
 
-  <!-- =========================
-       LEGEND
-  ========================= -->
-
-  <div class="legend">
-
-    <span>
-      <i class="dot blue"></i>
-      Box 1 — A
-    </span>
-
-    <span>
-      <i class="dot red"></i>
-      Box 2 — B
-    </span>
-
-    <span>
-      Lenticular Simulation
-    </span>
-
-  </div>
-
-</div>
+        const card =
+            document.getElementById(
+                "card"
+            );
 
 
-<script>
-
-  /* =====================================================
-     ELEMENTS
-  ===================================================== */
-
-  const stage =
-    document.getElementById("stage");
-
-  const card =
-    document.getElementById("card");
-
-  const layerA =
-    document.getElementById("layerA");
-
-  const layerB =
-    document.getElementById("layerB");
-
-  const shine =
-    document.getElementById("shine");
-
-  const yawOutput =
-    document.getElementById("yaw");
-
-  const pitchOutput =
-    document.getElementById("pitch");
-
-  const visibleOutput =
-    document.getElementById("visible");
-
-  const resetButton =
-    document.getElementById("reset");
-
-  const autoButton =
-    document.getElementById("autoRotate");
+        const layerA =
+            document.getElementById(
+                "layerA"
+            );
 
 
-  /* =====================================================
-     VARIABLES
-  ===================================================== */
-
-  let yaw = 0;
-  let pitch = 0;
-
-  let dragging = false;
-
-  let lastX = 0;
-  let lastY = 0;
-
-  let autoRotate = false;
-
-  let animationFrame;
+        const layerB =
+            document.getElementById(
+                "layerB"
+            );
 
 
-  /* =====================================================
-     LIMIT FUNCTION
-  ===================================================== */
-
-  function clamp(
-    value,
-    min,
-    max
-  ) {
-
-    return Math.max(
-      min,
-      Math.min(max, value)
-    );
-
-  }
+        const shine =
+            document.getElementById(
+                "shine"
+            );
 
 
-  /* =====================================================
-     RENDER 3D
-  ===================================================== */
-
-  function render() {
-
-    /*
-      Batasi sudut supaya efek
-      photocard tetap natural.
-    */
-
-    yaw =
-      clamp(
-        yaw,
-        -45,
-        45
-      );
-
-    pitch =
-      clamp(
-        pitch,
-        -30,
-        30
-      );
+        const resetButton =
+            document.getElementById(
+                "reset"
+            );
 
 
-    /*
-      3D ROTATION
-    */
-
-    card.style.transform =
-      `
-      rotateX(${-pitch}deg)
-      rotateY(${yaw}deg)
-      `;
+        const autoButton =
+            document.getElementById(
+                "autoRotate"
+            );
 
 
-    /* =================================================
-       LENTICULAR IMAGE SWITCHING
-    ================================================= */
-
-    /*
-      Di tengah:
-      A dan B sedikit overlap.
-
-      Makin kiri:
-      A semakin dominan.
-
-      Makin kanan:
-      B semakin dominan.
-    */
-
-    const transition =
-      Math.abs(yaw) / 30;
+        const themeButton =
+            document.getElementById(
+                "themeButton"
+            );
 
 
-    if (yaw < 0) {
+        /* =====================================================
+           ROTATION
+        ===================================================== */
 
-      layerA.style.opacity = 1;
+        let yaw =
+            0;
 
-      layerB.style.opacity =
-        clamp(
-          transition,
-          0,
-          1
+
+        let pitch =
+            0;
+
+
+        /* =====================================================
+           POSITION
+        ===================================================== */
+
+        let positionX =
+            0;
+
+
+        let positionY =
+            0;
+
+
+        /* =====================================================
+           ZOOM
+        ===================================================== */
+
+        let zoom =
+            1;
+
+
+        const MIN_ZOOM =
+            0.60;
+
+
+        const MAX_ZOOM =
+            1.80;
+
+
+        /* =====================================================
+           POINTER STATE
+        ===================================================== */
+
+        let dragging =
+            false;
+
+
+        let moving =
+            false;
+
+
+        let lastX =
+            0;
+
+
+        let lastY =
+            0;
+
+
+        /* =====================================================
+           AUTO ROTATE
+        ===================================================== */
+
+        let autoRotate =
+            false;
+
+
+        let animationFrame =
+            null;
+
+
+        let autoStartTime =
+            null;
+
+
+        /*
+            One complete cycle:
+
+            +45°
+              ↓
+            -45°
+              ↓
+            +45°
+
+            10 seconds.
+        */
+
+        const AUTO_CYCLE =
+            10000;
+
+
+        /* =====================================================
+           CLAMP
+        ===================================================== */
+
+        function clamp(
+            value,
+            min,
+            max
+        ) {
+
+            return Math.max(
+                min,
+                Math.min(
+                    max,
+                    value
+                )
+            );
+
+        }
+
+
+        /* =====================================================
+           RENDER
+        ===================================================== */
+
+        function render() {
+
+
+            /* =============================================
+               ROTATION LIMIT
+            ============================================== */
+
+            yaw =
+                clamp(
+                    yaw,
+                    -45,
+                    45
+                );
+
+
+            pitch =
+                clamp(
+                    pitch,
+                    -30,
+                    30
+                );
+
+
+            /* =============================================
+               POSITION
+            ============================================== */
+
+            cardWrapper.style.transform =
+
+                `
+                translate3d(
+                    ${positionX}px,
+                    ${positionY}px,
+                    0
+                )
+                `;
+
+
+            /* =============================================
+               ROTATION + ZOOM
+            ============================================== */
+
+            card.style.transform =
+
+                `
+                rotateX(${-pitch}deg)
+                rotateY(${yaw}deg)
+                scale(${zoom})
+                `;
+
+
+            /* =============================================
+               PHOTO A / PHOTO B
+            ============================================== */
+
+            if (yaw <= 0) {
+
+
+                /*
+                    Looking toward the left:
+
+                    Photo A becomes dominant.
+                */
+
+                layerA.style.opacity =
+                    1;
+
+
+                layerB.style.opacity =
+
+                    clamp(
+                        Math.abs(yaw) / 28,
+                        0,
+                        1
+                    );
+
+            }
+
+            else {
+
+
+                /*
+                    Looking toward the right:
+
+                    Photo B becomes dominant.
+                */
+
+                layerB.style.opacity =
+                    1;
+
+
+                layerA.style.opacity =
+
+                    clamp(
+                        1 -
+                        yaw / 28,
+                        0,
+                        1
+                    );
+
+            }
+
+
+            /* =============================================
+               3D DEPTH
+            ============================================== */
+
+            const depthA =
+
+                7 +
+                (
+                    (yaw + 45) /
+                    90
+                ) * 7;
+
+
+            const depthB =
+
+                5 +
+                (
+                    (45 - yaw) /
+                    90
+                ) * 7;
+
+
+            layerA.style.transform =
+
+                `
+                translateZ(
+                    ${depthA}px
+                )
+                `;
+
+
+            layerB.style.transform =
+
+                `
+                translateZ(
+                    ${depthB}px
+                )
+                `;
+
+
+            /* =============================================
+               LIGHT REFLECTION
+            ============================================== */
+
+            shine.style.transform =
+
+                `
+                translateX(
+                    ${yaw * 1.7}%
+                )
+
+                translateY(
+                    ${pitch * .5}%
+                )
+
+                rotate(8deg)
+                `;
+
+        }
+
+
+        /* =====================================================
+           LEFT CLICK + DRAG
+           ROTATE
+        ===================================================== */
+
+        stage.addEventListener(
+            "pointerdown",
+            function(event) {
+
+
+                /*
+                    LEFT MOUSE BUTTON ONLY.
+                */
+
+                if (
+                    event.button !== 0
+                ) {
+
+                    return;
+
+                }
+
+
+                dragging =
+                    true;
+
+
+                moving =
+                    false;
+
+
+                lastX =
+                    event.clientX;
+
+
+                lastY =
+                    event.clientY;
+
+
+                stage.setPointerCapture(
+                    event.pointerId
+                );
+
+
+                event.preventDefault();
+
+            }
         );
 
-    }
 
-    else if (yaw > 0) {
+        /* =====================================================
+           RIGHT CLICK + DRAG
+           MOVE
+        ===================================================== */
 
-      layerB.style.opacity = 1;
+        stage.addEventListener(
+            "pointerdown",
+            function(event) {
 
-      layerA.style.opacity =
-        clamp(
-          transition,
-          0,
-          1
+
+                /*
+                    RIGHT MOUSE BUTTON.
+                */
+
+                if (
+                    event.button !== 2
+                ) {
+
+                    return;
+
+                }
+
+
+                moving =
+                    true;
+
+
+                dragging =
+                    false;
+
+
+                lastX =
+                    event.clientX;
+
+
+                lastY =
+                    event.clientY;
+
+
+                stage.setPointerCapture(
+                    event.pointerId
+                );
+
+
+                event.preventDefault();
+
+            }
         );
 
-    }
 
-    else {
+        /* =====================================================
+           POINTER MOVE
+        ===================================================== */
 
-      layerA.style.opacity = 1;
+        stage.addEventListener(
+            "pointermove",
+            function(event) {
 
-      layerB.style.opacity = 0;
 
-    }
+                /* =============================================
+                   LEFT DRAG
+                   ROTATE
+                ============================================== */
 
+                if (dragging) {
 
-    /* =================================================
-       3D DEPTH
-    ================================================= */
 
-    const depthA =
-      5 +
-      ((yaw + 45) / 90) * 8;
+                    const deltaX =
 
-    const depthB =
-      5 +
-      ((45 - yaw) / 90) * 8;
+                        event.clientX -
+                        lastX;
 
 
-    layerA.style.transform =
-      `translateZ(${depthA}px)`;
+                    const deltaY =
 
+                        event.clientY -
+                        lastY;
 
-    layerB.style.transform =
-      `translateZ(${depthB}px)`;
 
+                    lastX =
+                        event.clientX;
 
-    /* =================================================
-       LIGHT REFLECTION
-    ================================================= */
 
-    shine.style.transform =
-      `
-      translateX(${yaw * 1.6}%)
-      translateY(${pitch * .5}%)
-      rotate(8deg)
-      `;
+                    lastY =
+                        event.clientY;
 
 
-    /* =================================================
-       INFORMATION
-    ================================================= */
+                    /*
+                        Horizontal mouse movement
+                        controls Y rotation.
+                    */
 
-    yawOutput.textContent =
-      Math.round(yaw) + "°";
+                    yaw +=
+                        deltaX * .45;
 
-    pitchOutput.textContent =
-      Math.round(pitch) + "°";
 
+                    /*
+                        Vertical mouse movement
+                        controls X rotation.
+                    */
 
-    if (Math.abs(yaw) < 5) {
+                    pitch -=
+                        deltaY * .35;
 
-      visibleOutput.textContent =
-        "A + B";
 
-    }
+                    render();
 
-    else if (yaw < 0) {
+                }
 
-      visibleOutput.textContent =
-        "A";
 
-    }
+                /* =============================================
+                   RIGHT DRAG
+                   MOVE
+                ============================================== */
 
-    else {
+                if (moving) {
 
-      visibleOutput.textContent =
-        "B";
 
-    }
+                    const deltaX =
 
-  }
+                        event.clientX -
+                        lastX;
 
 
-  /* =====================================================
-     POINTER DOWN
-  ===================================================== */
+                    const deltaY =
 
-  stage.addEventListener(
-    "pointerdown",
-    function(event) {
+                        event.clientY -
+                        lastY;
 
-      dragging = true;
 
-      lastX =
-        event.clientX;
+                    lastX =
+                        event.clientX;
 
-      lastY =
-        event.clientY;
 
+                    lastY =
+                        event.clientY;
 
-      stage.setPointerCapture(
-        event.pointerId
-      );
 
-    }
-  );
+                    positionX +=
+                        deltaX;
 
 
-  /* =====================================================
-     POINTER MOVE
-  ===================================================== */
+                    positionY +=
+                        deltaY;
 
-  stage.addEventListener(
-    "pointermove",
-    function(event) {
 
-      if (!dragging) {
-        return;
-      }
+                    /*
+                        Limit movement.
+                    */
 
+                    positionX =
+                        clamp(
+                            positionX,
+                            -500,
+                            500
+                        );
 
-      const deltaX =
-        event.clientX -
-        lastX;
 
+                    positionY =
+                        clamp(
+                            positionY,
+                            -500,
+                            500
+                        );
 
-      const deltaY =
-        event.clientY -
-        lastY;
 
+                    render();
 
-      lastX =
-        event.clientX;
+                }
 
-      lastY =
-        event.clientY;
-
-
-      /*
-        Horizontal drag
-        → Y axis rotation
-      */
-
-      yaw +=
-        deltaX * 0.45;
-
-
-      /*
-        Vertical drag
-        → X axis rotation
-      */
-
-      pitch -=
-        deltaY * 0.35;
-
-
-      render();
-
-    }
-  );
-
-
-  /* =====================================================
-     POINTER UP
-  ===================================================== */
-
-  function stopDragging() {
-
-    dragging = false;
-
-  }
-
-
-  stage.addEventListener(
-    "pointerup",
-    stopDragging
-  );
-
-  stage.addEventListener(
-    "pointercancel",
-    stopDragging
-  );
-
-
-  /* =====================================================
-     RESET
-  ===================================================== */
-
-  resetButton.addEventListener(
-    "click",
-    function() {
-
-      yaw = 0;
-
-      pitch = 0;
-
-      render();
-
-    }
-  );
-
-
-  /* =====================================================
-     AUTO ROTATE
-  ===================================================== */
-
-  autoButton.addEventListener(
-    "click",
-    function() {
-
-      autoRotate =
-        !autoRotate;
-
-
-      if (autoRotate) {
-
-        autoButton.textContent =
-          "Stop Auto Rotate";
-
-        animate();
-
-      }
-
-      else {
-
-        autoButton.textContent =
-          "Auto Rotate";
-
-        cancelAnimationFrame(
-          animationFrame
+            }
         );
 
-      }
 
-    }
-  );
+        /* =====================================================
+           POINTER UP
+        ===================================================== */
 
+        function stopPointer() {
 
-  /* =====================================================
-     ANIMATION
-  ===================================================== */
-
-  function animate() {
-
-    if (!autoRotate) {
-      return;
-    }
+            dragging =
+                false;
 
 
-    if (!dragging) {
+            moving =
+                false;
 
-      yaw += 0.35;
-
-
-      if (yaw > 45) {
-
-        yaw = -45;
-
-      }
+        }
 
 
-      render();
-
-    }
-
-
-    animationFrame =
-      requestAnimationFrame(
-        animate
-      );
-
-  }
+        stage.addEventListener(
+            "pointerup",
+            stopPointer
+        );
 
 
-  /* =====================================================
-     INITIALIZE
-  ===================================================== */
+        stage.addEventListener(
+            "pointercancel",
+            stopPointer
+        );
 
-  render();
 
-</script>
+        /* =====================================================
+           DISABLE RIGHT CLICK CONTEXT MENU
+        ===================================================== */
+
+        stage.addEventListener(
+            "contextmenu",
+            function(event) {
+
+                event.preventDefault();
+
+            }
+        );
+
+
+        /* =====================================================
+           SCROLL = ZOOM
+        ===================================================== */
+
+        stage.addEventListener(
+            "wheel",
+            function(event) {
+
+
+                /*
+                    Prevent page scrolling.
+                */
+
+                event.preventDefault();
+
+
+                /*
+                    Scroll UP:
+
+                    Zoom IN
+                */
+
+                if (
+                    event.deltaY < 0
+                ) {
+
+                    zoom +=
+                        .05;
+
+                }
+
+                /*
+                    Scroll DOWN:
+
+                    Zoom OUT
+                */
+
+                else {
+
+                    zoom -=
+                        .05;
+
+                }
+
+
+                /*
+                    Keep zoom within limits.
+                */
+
+                zoom =
+                    clamp(
+                        zoom,
+                        MIN_ZOOM,
+                        MAX_ZOOM
+                    );
+
+
+                render();
+
+            },
+            {
+                passive:
+                    false
+            }
+        );
+
+
+        /* =====================================================
+           RESET
+        ===================================================== */
+
+        resetButton.addEventListener(
+            "click",
+            function() {
+
+
+                yaw =
+                    0;
+
+
+                pitch =
+                    0;
+
+
+                zoom =
+                    1;
+
+
+                positionX =
+                    0;
+
+
+                positionY =
+                    0;
+
+
+                render();
+
+            }
+        );
+
+
+        /* =====================================================
+           AUTO ROTATE BUTTON
+        ===================================================== */
+
+        autoButton.addEventListener(
+            "click",
+            function() {
+
+
+                autoRotate =
+                    !autoRotate;
+
+
+                if (
+                    autoRotate
+                ) {
+
+
+                    autoButton.textContent =
+                        "■ Stop Auto Rotate";
+
+
+                    /*
+                        Start from +45°.
+                    */
+
+                    yaw =
+                        45;
+
+
+                    autoStartTime =
+                        performance.now();
+
+
+                    animateAutoRotate();
+
+                }
+
+                else {
+
+
+                    autoButton.textContent =
+                        "↻ Auto Rotate";
+
+
+                    cancelAnimationFrame(
+                        animationFrame
+                    );
+
+
+                    animationFrame =
+                        null;
+
+
+                    autoStartTime =
+                        null;
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           AUTO ROTATE ANIMATION
+        =====================================================
+
+           +45°
+             ↓
+           -45°
+             ↓
+           +45°
+
+           Full cycle = 10 seconds.
+
+           Uses cosine interpolation so the movement
+           accelerates/decelerates smoothly.
+        ===================================================== */
+
+        function animateAutoRotate(
+            timestamp
+        ) {
+
+
+            if (
+                !autoRotate
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                autoStartTime === null
+            ) {
+
+                autoStartTime =
+                    timestamp ||
+                    performance.now();
+
+            }
+
+
+            const now =
+                timestamp ||
+                performance.now();
+
+
+            const elapsed =
+
+                (
+                    now -
+                    autoStartTime
+                ) %
+                AUTO_CYCLE;
+
+
+            const progress =
+
+                elapsed /
+                AUTO_CYCLE;
+
+
+            /*
+                +45 → -45 → +45
+            */
+
+            yaw =
+
+                Math.cos(
+                    progress *
+                    Math.PI *
+                    2
+                ) * 45;
+
+
+            render();
+
+
+            animationFrame =
+                requestAnimationFrame(
+                    animateAutoRotate
+                );
+
+        }
+
+
+        /* =====================================================
+           LIGHT / DARK MODE
+        =====================================================
+
+           DEFAULT:
+
+           DARK MODE
+
+           Button:
+
+           make light mode
+
+           After clicking:
+
+           make dark mode
+        ===================================================== */
+
+        themeButton.addEventListener(
+            "click",
+            function() {
+
+
+                const lightMode =
+
+                    document.body.classList.toggle(
+                        "light-mode"
+                    );
+
+
+                if (
+                    lightMode
+                ) {
+
+
+                    themeButton.textContent =
+                        "make dark mode";
+
+                }
+
+                else {
+
+
+                    themeButton.textContent =
+                        "make light mode";
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           INITIAL STATE
+        ===================================================== */
+
+        /*
+            Start in DARK MODE.
+        */
+
+        document.body.classList.remove(
+            "light-mode"
+        );
+
+
+        themeButton.textContent =
+            "make light mode";
+
+
+        /*
+            Initial render.
+        */
+
+        render();
+
+    </script>
 
 </body>
+
 </html>
