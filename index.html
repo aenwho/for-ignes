@@ -150,7 +150,7 @@
 
 
         /* =====================================================
-           FRAME
+           MAIN FRAME
         ===================================================== */
 
         .stage {
@@ -162,9 +162,10 @@
                 100%;
 
             /*
-                Fixed aspect ratio.
-                Zooming the card will NOT resize
-                this frame.
+                Frame aspect ratio is fixed.
+
+                The frame itself will NOT resize
+                when the card is zoomed.
             */
 
             aspect-ratio:
@@ -294,8 +295,8 @@
                 1;
 
             /*
-                Visible for 10 seconds,
-                then fades out.
+                Show for 10 seconds,
+                then fade out.
             */
 
             animation:
@@ -342,7 +343,7 @@
         .card-wrapper {
 
             /*
-                Card size.
+                Photocard size.
             */
 
             width:
@@ -747,6 +748,10 @@
 <body>
 
 
+    <!-- =====================================================
+         MAIN CONTAINER
+    ===================================================== -->
+
     <div
         class="container"
         id="mainContainer"
@@ -810,40 +815,40 @@
 
                     <!-- =====================================
                          PHOTO A
+
+                         IMPORTANT:
+                         Filename exactly matches GitHub:
+                         foto_A.PNG
                     ====================================== -->
 
                     <img
-                        src="foto_a.png"
-
+                        src="foto_A.PNG"
                         class="layer layer-a"
-
                         id="layerA"
-
                         alt="Photo A"
-
                         draggable="false"
                     >
 
 
                     <!-- =====================================
                          PHOTO B
+
+                         IMPORTANT:
+                         Filename exactly matches GitHub:
+                         foto_B.PNG
                     ====================================== -->
 
                     <img
-                        src="foto_b.png"
-
+                        src="foto_B.PNG"
                         class="layer layer-b"
-
                         id="layerB"
-
                         alt="Photo B"
-
                         draggable="false"
                     >
 
 
                     <!-- =====================================
-                         LENTICULAR EFFECT
+                         LENTICULAR RIDGES
                     ====================================== -->
 
                     <div
@@ -852,7 +857,7 @@
 
 
                     <!-- =====================================
-                         REFLECTION
+                         LIGHT REFLECTION
                     ====================================== -->
 
                     <div
@@ -873,10 +878,14 @@
              CONTROLS
         ================================================= -->
 
-        <div class="controls">
+        <div
+            class="controls"
+        >
 
 
-            <!-- RESET -->
+            <!-- =============================================
+                 RESET
+            ============================================== -->
 
             <button
                 type="button"
@@ -886,7 +895,9 @@
             </button>
 
 
-            <!-- AUTO ROTATE -->
+            <!-- =============================================
+                 AUTO ROTATE
+            ============================================== -->
 
             <button
                 type="button"
@@ -896,7 +907,9 @@
             </button>
 
 
-            <!-- THEME -->
+            <!-- =============================================
+                 LIGHT / DARK MODE
+            ============================================== -->
 
             <button
                 type="button"
@@ -1034,7 +1047,7 @@
 
 
         /* =====================================================
-           AUTO ROTATE
+           AUTO ROTATE STATE
         ===================================================== */
 
         let autoRotate =
@@ -1050,7 +1063,7 @@
 
 
         /*
-            One complete cycle:
+            One full cycle:
 
             +45°
               ↓
@@ -1058,6 +1071,7 @@
               ↓
             +45°
 
+            Duration:
             10 seconds.
         */
 
@@ -1066,7 +1080,7 @@
 
 
         /* =====================================================
-           CLAMP
+           CLAMP FUNCTION
         ===================================================== */
 
         function clamp(
@@ -1129,7 +1143,7 @@
 
 
             /* =============================================
-               ROTATION + ZOOM
+               CARD ROTATION + ZOOM
             ============================================== */
 
             card.style.transform =
@@ -1142,17 +1156,18 @@
 
 
             /* =============================================
-               PHOTO A / PHOTO B
+               PHOTO TRANSITION
             ============================================== */
 
-            if (yaw <= 0) {
+            /*
+                Left side:
+                Photo A dominates.
+            */
 
+            if (
+                yaw <= 0
+            ) {
 
-                /*
-                    Looking toward the left:
-
-                    Photo A becomes dominant.
-                */
 
                 layerA.style.opacity =
                     1;
@@ -1168,14 +1183,14 @@
 
             }
 
+
+            /*
+                Right side:
+                Photo B dominates.
+            */
+
             else {
 
-
-                /*
-                    Looking toward the right:
-
-                    Photo B becomes dominant.
-                */
 
                 layerB.style.opacity =
                     1;
@@ -1256,7 +1271,7 @@
 
         /* =====================================================
            LEFT CLICK + DRAG
-           ROTATE
+           = ROTATE
         ===================================================== */
 
         stage.addEventListener(
@@ -1265,7 +1280,7 @@
 
 
                 /*
-                    LEFT MOUSE BUTTON ONLY.
+                    Only left mouse button.
                 */
 
                 if (
@@ -1306,7 +1321,7 @@
 
         /* =====================================================
            RIGHT CLICK + DRAG
-           MOVE
+           = MOVE
         ===================================================== */
 
         stage.addEventListener(
@@ -1315,7 +1330,7 @@
 
 
                 /*
-                    RIGHT MOUSE BUTTON.
+                    Only right mouse button.
                 */
 
                 if (
@@ -1364,11 +1379,12 @@
 
 
                 /* =============================================
-                   LEFT DRAG
-                   ROTATE
+                   LEFT DRAG = ROTATE
                 ============================================== */
 
-                if (dragging) {
+                if (
+                    dragging
+                ) {
 
 
                     const deltaX =
@@ -1392,8 +1408,8 @@
 
 
                     /*
-                        Horizontal mouse movement
-                        controls Y rotation.
+                        Horizontal movement:
+                        Y axis rotation.
                     */
 
                     yaw +=
@@ -1401,8 +1417,8 @@
 
 
                     /*
-                        Vertical mouse movement
-                        controls X rotation.
+                        Vertical movement:
+                        X axis rotation.
                     */
 
                     pitch -=
@@ -1415,11 +1431,12 @@
 
 
                 /* =============================================
-                   RIGHT DRAG
-                   MOVE
+                   RIGHT DRAG = MOVE
                 ============================================== */
 
-                if (moving) {
+                if (
+                    moving
+                ) {
 
 
                     const deltaX =
@@ -1451,7 +1468,7 @@
 
 
                     /*
-                        Limit movement.
+                        Movement limits.
                     */
 
                     positionX =
@@ -1507,7 +1524,7 @@
 
 
         /* =====================================================
-           DISABLE RIGHT CLICK CONTEXT MENU
+           DISABLE RIGHT CLICK MENU
         ===================================================== */
 
         stage.addEventListener(
@@ -1530,16 +1547,15 @@
 
 
                 /*
-                    Prevent page scrolling.
+                    Stop page scrolling while
+                    interacting with the card.
                 */
 
                 event.preventDefault();
 
 
                 /*
-                    Scroll UP:
-
-                    Zoom IN
+                    Scroll up = zoom in.
                 */
 
                 if (
@@ -1547,26 +1563,25 @@
                 ) {
 
                     zoom +=
-                        .05;
+                        0.05;
 
                 }
 
-                /*
-                    Scroll DOWN:
 
-                    Zoom OUT
+                /*
+                    Scroll down = zoom out.
                 */
 
                 else {
 
                     zoom -=
-                        .05;
+                        0.05;
 
                 }
 
 
                 /*
-                    Keep zoom within limits.
+                    Limit zoom.
                 */
 
                 zoom =
@@ -1635,6 +1650,10 @@
                     !autoRotate;
 
 
+                /* =============================================
+                   START
+                ============================================== */
+
                 if (
                     autoRotate
                 ) {
@@ -1645,7 +1664,7 @@
 
 
                     /*
-                        Start from +45°.
+                        Begin from +45°.
                     */
 
                     yaw =
@@ -1659,6 +1678,11 @@
                     animateAutoRotate();
 
                 }
+
+
+                /* =============================================
+                   STOP
+                ============================================== */
 
                 else {
 
@@ -1689,16 +1713,16 @@
            AUTO ROTATE ANIMATION
         =====================================================
 
+           Movement:
+
            +45°
              ↓
            -45°
              ↓
            +45°
 
-           Full cycle = 10 seconds.
-
-           Uses cosine interpolation so the movement
-           accelerates/decelerates smoothly.
+           One complete cycle:
+           10 seconds.
         ===================================================== */
 
         function animateAutoRotate(
@@ -1715,6 +1739,10 @@
             }
 
 
+            /*
+                Initialize timer.
+            */
+
             if (
                 autoStartTime === null
             ) {
@@ -1727,9 +1755,14 @@
 
 
             const now =
+
                 timestamp ||
                 performance.now();
 
+
+            /*
+                Time elapsed.
+            */
 
             const elapsed =
 
@@ -1740,6 +1773,10 @@
                 AUTO_CYCLE;
 
 
+            /*
+                Convert to 0 → 1.
+            */
+
             const progress =
 
                 elapsed /
@@ -1747,7 +1784,12 @@
 
 
             /*
+                Cosine wave:
+
                 +45 → -45 → +45
+
+                Smooth acceleration and
+                deceleration.
             */
 
             yaw =
@@ -1763,6 +1805,7 @@
 
 
             animationFrame =
+
                 requestAnimationFrame(
                     animateAutoRotate
                 );
@@ -1772,25 +1815,16 @@
 
         /* =====================================================
            LIGHT / DARK MODE
-        =====================================================
-
-           DEFAULT:
-
-           DARK MODE
-
-           Button:
-
-           make light mode
-
-           After clicking:
-
-           make dark mode
         ===================================================== */
 
         themeButton.addEventListener(
             "click",
             function() {
 
+
+                /*
+                    Toggle light mode.
+                */
 
                 const lightMode =
 
@@ -1799,10 +1833,13 @@
                     );
 
 
+                /*
+                    Update button text.
+                */
+
                 if (
                     lightMode
                 ) {
-
 
                     themeButton.textContent =
                         "make dark mode";
@@ -1810,7 +1847,6 @@
                 }
 
                 else {
-
 
                     themeButton.textContent =
                         "make light mode";
